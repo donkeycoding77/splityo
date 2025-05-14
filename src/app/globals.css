@@ -1,0 +1,191 @@
+@import "tailwindcss";
+@import "flowbite/src/themes/default";
+
+@plugin "flowbite/plugin";
+@source "../node_modules/flowbite";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-jost);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: linear-gradient(to bottom, #bbf7d0, #fce7f3 50%, #ffedd5 100%);
+    --foreground: linear-gradient(to bottom, #bbf7d0, #fce7f3 50%, #ffedd5 100%);
+  }
+}
+
+body {
+  background: linear-gradient(to bottom, #bbf7d0, #fce7f3 50%, #ffedd5 100%);
+  color: var(--foreground);
+  font-family: var(--font-jost), Arial, Helvetica, sans-serif;
+}
+
+.url-title {
+  margin: 0;
+  padding: 0;
+}
+
+/* App backgrounds */
+.bg-main-gradient {
+  background: linear-gradient(to bottom, #bbf7d0, #fce7f3 50%, #ffedd5 100%);
+}
+.bg-cta-gradient {
+  background: linear-gradient(to right, #4ade80, #f472b6, #fdba74);
+}
+
+/* Card styles */
+.card {
+  background: #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px 0 rgba(0,0,0,0.08);
+  padding: 1rem;
+  margin-bottom: 20px;
+}
+.card-ring-green {
+  border: 2px solid #bbf7d0;
+}
+.card-ring-pink {
+  border: 2px solid #fbcfe8;
+}
+.card-ring-orange {
+  border: 2px solid #fdba74;
+}
+
+/* Button styles */
+.btn-main {
+  border-radius: 9999px;
+  background: #4ade80;
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.125rem;
+  padding: 1rem 2rem;
+  box-shadow: 0 4px 16px 0 rgba(0,0,0,0.10);
+  transition: all 0.2s;
+}
+.btn-main:hover {
+  background: #f472b6;
+  color: #fff;
+  transform: scale(1.05);
+}
+.btn-secondary {
+  border-radius: 9999px;
+  background: #fff;
+  color: #4ade80;
+  font-weight: bold;
+  font-size: 1.125rem;
+  padding: 1rem 2rem;
+  box-shadow: 0 4px 16px 0 rgba(0,0,0,0.10);
+  transition: all 0.2s;
+}
+.btn-secondary:hover {
+  background: #fce7f3;
+  color: #f472b6;
+  transform: scale(1.05);
+}
+
+/* Input styles */
+.input-main {
+  width: 100%;
+  border-radius: 1rem;
+  border: 2px solid #bbf7d0;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+.input-main:focus {
+  border: 2px solid #fbcfe8;
+  box-shadow: 0 0 0 2px #fbcfe8;
+  outline: none;
+}
+.input-member {
+  border: 2px solid #fbcfe8;
+}
+.input-member:focus {
+  border: 2px solid #4ade80;
+  box-shadow: 0 0 0 2px #bbf7d0;
+}
+.input-left-rounded {
+  border-top-left-radius: 1rem;
+  border-bottom-left-radius: 1rem;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.input-custom-split {
+  width: 80px;
+  border-radius: 0.6rem;
+  border: 2px solid #d1d5db; /* Tailwind gray-300 */
+  padding: 0.1rem 5px;
+  font-size: 0.85rem;
+  font-weight: 400;
+  text-align: right;
+  margin-left: auto;
+  display: block;
+}
+
+.input-custom-highlight {
+  border: 2px solid orange;
+}
+
+.input-custom-highlight:focus {
+  border: 2px solid rgb(240, 125, 209);
+}
+
+/* Heading styles */
+.heading-main {
+  font-size: 2rem;
+  font-weight: 800;
+  text-align: center;
+  color: #171717;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* Utility */
+.mt-8 { margin-top: 2rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 0.75rem; }
+.gap-6 { gap: 1.5rem; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.text-center { text-align: center; }
+.text-lg { font-size: 1.125rem; }
+.font-bold { font-weight: 700; }
+.font-extrabold { font-weight: 800; }
+.text-pink-500 { color: #ec4899; }
+.text-green-500 { color: #22c55e; }
+.text-orange-400 { color: #fb923c; }
+.text-gray-900 { color: #171717; }
+.text-gray-800 { color: #27272a; }
+.text-xl { font-size: 1.25rem; }
+.shadow-2xl { box-shadow: 0 8px 32px 0 rgba(0,0,0,0.16); }
+.shadow-lg { box-shadow: 0 4px 16px 0 rgba(0,0,0,0.10); }
+.rounded-3xl { border-radius: 1.5rem; }
+.rounded-full { border-radius: 9999px; }
+.w-full { width: 100%; }
+.max-w-md { max-width: 28rem; }
+.p-6 { padding: 1.5rem; }
+.p-8 { padding: 2rem; }
+.sm\:p-8 { padding: 2rem; }
+.mt-8 { margin-top: 2rem; }
+
+.bebas-neue-regular {
+  font-family: "Bebas Neue", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
