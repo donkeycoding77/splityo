@@ -1,4 +1,5 @@
 import { PencilSquareIcon } from '@heroicons/react/20/solid';
+import { useState } from 'react';
 
 interface Member {
   id: string;
@@ -38,6 +39,8 @@ export default function ExpensesList({
   onAddExpense,
   members
 }: ExpensesListProps) {
+  const [showNames, setShowNames] = useState<{ [expenseId: string]: boolean }>({});
+
   const displayedExpenses = showAllExpenses ? expenses : expenses.slice(0, 2);
 
   return (
@@ -57,6 +60,9 @@ export default function ExpensesList({
         <ul className="space-y-3">
           {displayedExpenses.map((expense) => {
             const paidByName = members.find(m => m.id === expense.paid_by_member_id)?.name || 'Unknown';
+            const splitNames = expense.split_between
+              .map(split => members.find(m => m.id === split.member_id)?.name || 'Unknown');
+            const splitCount = splitNames.length;
             return (
               <li
                 key={expense.id}
@@ -77,9 +83,23 @@ export default function ExpensesList({
                     {currency === 'USD' ? '$' : currency}{expense.amount.toFixed(2)}
                   </span>
                 </div>
-                <div className="flex justify-between items-center mt-2">
+                <div className="flex justify-between items-center mt-0">
+                  <span className="text-gray-400 text-sm">Paid by <span className="font-bold">{paidByName}</span></span>
                   <span className="text-gray-400 text-sm">{new Date(expense.date).toLocaleDateString()}</span>
-                  <span className="text-gray-400 text-sm">paid by {paidByName}</span>
+                </div>
+                <div className="flex justify-between items-center mt-0">
+                  <span className="text-gray-400 text-sm">
+                    Split between{' '}
+                    <span
+                      className="cursor-pointer"
+                      onClick={() => setShowNames(prev => ({ ...prev, [expense.id]: !prev[expense.id] }))}
+                    >
+                      {showNames[expense.id]
+                        ? <span className="">{splitNames.join(', ')}</span>
+                        : <span className="underline">{splitCount} people</span>
+                      }
+                    </span>
+                  </span>
                 </div>
               </li>
             );

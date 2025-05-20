@@ -23,6 +23,10 @@ export default function CreateGroupPage() {
   const [newMember, setNewMember] = useState('');
   const [groupName, setGroupName] = useState('');
   const [currency, setCurrency] = useState('USD');
+  const [description, setDescription] = useState('');
+  const [urls, setUrls] = useState<{ title: string; url: string }[]>([]);
+  const [newUrlTitle, setNewUrlTitle] = useState('');
+  const [newUrl, setNewUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,6 +40,18 @@ export default function CreateGroupPage() {
       setMembers([...members, trimmed]);
       setNewMember('');
     }
+  };
+
+  const handleAddUrl = () => {
+    if (newUrlTitle.trim() && newUrl.trim()) {
+      setUrls([...urls, { title: newUrlTitle.trim(), url: newUrl.trim() }]);
+      setNewUrlTitle('');
+      setNewUrl('');
+    }
+  };
+
+  const handleRemoveUrl = (index: number) => {
+    setUrls(urls.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,6 +84,8 @@ export default function CreateGroupPage() {
             name: groupName,
             currency,
             members: membersArray,
+            description: description.trim() || null,
+            url: urls.length > 0 ? urls : null,
             created_at: new Date().toISOString(),
           }
         ])
@@ -103,68 +121,68 @@ export default function CreateGroupPage() {
         </div>
 
         <div className="w-full max-w-md card shadow-2xl mt-2">
-        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+        <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
           {error && (
             <div className="bg-red-50 text-red-500 p-3 rounded-lg">
               {error}
             </div>
           )}
           
-            <div>
-            <label className="block text-base font-bold mb-1.5 text-gray-800">
+          <div>
+            <label className="block text-base font-bold mb-1 text-gray-800">
               Group Name <span className="text-pink-400">*</span>
             </label>
-                <input
-                type="text"
-                className="input-main"
-                placeholder="e.g. Taco Tuesday Crew 🌮"
-                value={groupName}
-                onChange={e => setGroupName(e.target.value)}
-                disabled={isLoading}
-                maxLength={32}
-                />
-            </div>
+            <input
+              type="text"
+              className="input-main"
+              placeholder="e.g. Taco Tuesday Crew 🌮"
+              value={groupName}
+              onChange={e => setGroupName(e.target.value)}
+              disabled={isLoading}
+              maxLength={32}
+            />
+          </div>
 
-            <div>
-            <label className="block text-base font-bold mb-1.5 text-gray-800">
+          <div>
+            <label className="block text-base font-bold mb-1 text-gray-800">
               Currency <span className="text-green-500">*</span>
             </label>
-                <Menu as="div" className="relative w-full">
+            <Menu as="div" className="relative w-full">
               <Menu.Button 
                 className="input-main bg-white flex justify-between items-center w-full px-4 py-2 text-left font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-pink-300"
                 disabled={isLoading}
               >
-                    <span>{currencyOptions.find(opt => opt.value === currency)?.label}</span>
-                    <ChevronDownIcon className="w-5 h-5 text-gray-400 ml-2" aria-hidden="true" />
-                  </Menu.Button>
-                  <Menu.Items className="absolute z-10 mt-2 w-full origin-top-left rounded-xl bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
-                    <div className="py-1">
-                      {currencyOptions.map(opt => (
-                        <Menu.Item key={opt.value}>
-                          {({ active }) => (
-                            <button
-                              type="button"
-                              className={`block w-full text-left px-4 py-2 text-base font-medium text-gray-700 transition-colors ${active ? 'bg-green-50 text-green-600' : ''}`}
-                              onClick={() => setCurrency(opt.value)}
-                            >
-                              {opt.label}
-                            </button>
-                          )}
-                        </Menu.Item>
-                      ))}
-                    </div>
-                  </Menu.Items>
-                </Menu>
-            </div>
+                <span>{currencyOptions.find(opt => opt.value === currency)?.label}</span>
+                <ChevronDownIcon className="w-5 h-5 text-gray-400 ml-2" aria-hidden="true" />
+              </Menu.Button>
+              <Menu.Items className="absolute z-10 mt-2 w-full origin-top-left rounded-xl bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
+                <div className="py-1">
+                  {currencyOptions.map(opt => (
+                    <Menu.Item key={opt.value}>
+                      {({ active }) => (
+                        <button
+                          type="button"
+                          className={`block w-full text-left px-4 py-2 text-base font-medium text-gray-700 transition-colors ${active ? 'bg-green-50 text-green-600' : ''}`}
+                          onClick={() => setCurrency(opt.value)}
+                        >
+                          {opt.label}
+                        </button>
+                      )}
+                    </Menu.Item>
+                  ))}
+                </div>
+              </Menu.Items>
+            </Menu>
+          </div>
 
-            <div>
-            <label className="block text-base font-bold mb-1.5 text-gray-800">
+          <div>
+            <label className="block text-base font-bold mb-1 text-gray-800">
               Members <span className="text-orange-400">*</span>
             </label>
             <div className="flex w-full">
               <input
                 type="text"
-                className="input-main input-left-rounded flex-1 border-r-0"
+                className="input-main flex-1 border-0"
                 placeholder="Member Name"
                 value={newMember}
                 onChange={e => setNewMember(e.target.value)}
@@ -174,7 +192,7 @@ export default function CreateGroupPage() {
               />
               <button
                 type="button"
-                className="bebas-neue-regular bg-green-400 hover:bg-pink-400 text-white font-bold px-6 rounded-r-lg rounded-l-none transition-colors text-xl flex items-center gap-2"
+                className="bg-green-400 hover:bg-pink-400 text-white font-bold px-4 rounded-lg transition-colors"
                 onClick={handleAddMember}
                 disabled={isLoading || !newMember.trim()}
               >
@@ -182,7 +200,7 @@ export default function CreateGroupPage() {
               </button>
             </div>
             {members.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
+              <div className="mt-1 flex flex-wrap gap-2">
                 {members.map((member, idx) => (
                   <span key={idx} className="flex items-center rounded-2xl border border-pink-200 bg-white pl-3 pr-2 py-1 text-gray-700 text-lg shadow-sm">
                     <span className="mr-2">{member}</span>
@@ -198,11 +216,78 @@ export default function CreateGroupPage() {
                 ))}
               </div>
             )}
-            </div>
+          </div>
 
-            <button
+          <div>
+            <label className="block text-base font-bold mb-1 text-gray-800">
+              Description <span className="text-gray-400 text-sm font-normal">(optional)</span>
+            </label>
+            <textarea
+              className="input-main min-h-[100px]"
+              placeholder="Add a description for your group..."
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              disabled={isLoading}
+              maxLength={500}
+            />
+          </div>
+
+          <div>
+            <label className="block text-base font-bold mb-1 text-gray-800">
+              Links <span className="text-gray-400 text-sm font-normal">(optional)</span>
+            </label>
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  className="input-main flex-1"
+                  placeholder="Link Title"
+                  value={newUrlTitle}
+                  onChange={e => setNewUrlTitle(e.target.value)}
+                  disabled={isLoading}
+                  maxLength={50}
+                />
+                <input
+                  type="url"
+                  className="input-main flex-1"
+                  placeholder="URL"
+                  value={newUrl}
+                  onChange={e => setNewUrl(e.target.value)}
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  className="bg-green-400 hover:bg-pink-400 text-white font-bold px-4 rounded-lg transition-colors"
+                  onClick={handleAddUrl}
+                  disabled={isLoading || !newUrlTitle.trim() || !newUrl.trim()}
+                >
+                  Add
+                </button>
+              </div>
+              {urls.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {urls.map((url, idx) => (
+                    <span key={idx} className="flex items-center rounded-2xl border border-pink-200 bg-white pl-3 pr-2 py-1 text-gray-700 text-sm shadow-sm">
+                      <a href={url.url} target="_blank" rel="noopener noreferrer" className="mr-2 hover:text-pink-500">
+                        {url.title}
+                      </a>
+                      <button
+                        type="button"
+                        className="text-gray-400 hover:text-pink-500 text-xl focus:outline-none"
+                        onClick={() => handleRemoveUrl(idx)}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <button
                 type="submit"
-                className="btn-main w-auto bebas-neue-regular"
+                className="btn-main w-auto bebas-neue-regular mt-2"
                 disabled={isLoading || !groupName.trim() || members.length < 2}
             >
             {isLoading ? 'Creating...' : 'Create Group 🎉'}

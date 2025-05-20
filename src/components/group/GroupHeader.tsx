@@ -9,9 +9,11 @@ interface GroupHeaderProps {
   name: string;
   currency: string;
   members: Member[];
+  description: string | null;
+  urls: { title: string; url: string }[] | null;
 }
 
-export default function GroupHeader({ name, currency, members }: GroupHeaderProps) {
+export default function GroupHeader({ name, currency, members, description, urls }: GroupHeaderProps) {
   return (
     <>
       <Link href="/" className="inline-flex items-center gap-2 text-green-500 hover:text-pink-500 font-bold text-lg transition-colors">
@@ -25,11 +27,34 @@ export default function GroupHeader({ name, currency, members }: GroupHeaderProp
       </Link>
 
       <div className="w-full max-w-md card shadow-2xl mt-4">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-1">
           <h2 className="text-2xl font-bold text-orange-400">{name}</h2>
           <span className="ml-2 px-2 py-1 rounded-xl border border-gray-100 text-orange-400 text-base shadow-sm">{currency}</span>
         </div>
-        <div className="space-y-4">
+        <div className="space-y-2">
+          {description && (
+            <div>
+              <p className="text-gray-500 text-sm italic">{description}</p>
+            </div>
+          )}
+          {urls && urls.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {urls.map((url, index) => (
+                <div key={index} className="flex items-center text-gray-700 text-sm gap-x-1">
+                  <span className="font-semibold text-orange-400">{url.title}:</span>
+                  <a
+                    href={url.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 underline max-w-[200px] truncate"
+                    title={url.url}
+                  >
+                    {url.url}
+                  </a>
+                </div>
+              ))}
+            </div>
+          )}
           <div>
             <h3 className="font-semibold text-gray-800">Members</h3>
             <div className="flex flex-wrap gap-2 mt-2">

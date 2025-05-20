@@ -8,6 +8,7 @@ import ExpensesList from '@/components/group/ExpensesList';
 import SettlementList from '@/components/group/SettlementList';
 import DetailsModal from '@/components/group/DetailsModal';
 import EditExpenseModal from '@/components/group/EditExpenseModal';
+import AddExpenseGroupModal from '@/components/group/AddExpenseGroupModal';
 
 interface Member {
   id: string;
@@ -19,6 +20,13 @@ interface Group {
   name: string;
   currency: string;
   members: Member[];
+  description: string | null;
+  url: { title: string; url: string }[] | null;
+  expense_groups: {
+    name: string;
+    primary_member_id: string;
+    members: string[];
+  }[];
   created_at: string;
 }
 
@@ -67,6 +75,14 @@ export default function GroupPage({ params }: { params: Promise<{ id: string }> 
   const [editSplitType, setEditSplitType] = useState<'equal' | 'custom'>('equal');
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
+
+  // Add expense group state
+  const [showExpenseGroupModal, setShowExpenseGroupModal] = useState(false);
+  const [expenseGroupName, setExpenseGroupName] = useState('');
+  const [selectedExpenseGroupMembers, setSelectedExpenseGroupMembers] = useState<string[]>([]);
+  const [expenseGroupLoading, setExpenseGroupLoading] = useState(false);
+  const [expenseGroupError, setExpenseGroupError] = useState<string | null>(null);
+  const [primaryMemberId, setPrimaryMemberId] = useState('');
 
   // Fetch group and expenses
   useEffect(() => {
@@ -164,12 +180,29 @@ export default function GroupPage({ params }: { params: Promise<{ id: string }> 
     if (!group) return {};
     const balances: Record<string, number> = {};
     group.members.forEach(m => (balances[m.id] = 0));
+
+    // First, calculate regular balances
     for (const exp of expenses) {
       for (const split of exp.split_between) {
         balances[split.member_id] -= split.amount;
       }
       balances[exp.paid_by_member_id] += exp.amount;
     }
+
+    // Then, adjust balances based on expense groups
+    for (const expGroup of (group.expense_groups || [])) {
+      const primaryMember = expGroup.primary_member_id;
+      const dependents = expGroup.members.filter(id => id !== primaryMember);
+
+      // For each dependent, transfer their negative balance to the primary member
+      for (const dependentId of dependents) {
+        if (balances[dependentId] < 0) {
+          balances[primaryMember] += balances[dependentId];
+          balances[dependentId] = 0;
+        }
+      }
+    }
+
     return balances;
   }
 
@@ -227,6 +260,57 @@ export default function GroupPage({ params }: { params: Promise<{ id: string }> 
     });
   }
 
+  // Add expense group handler
+  async function handleAddExpenseGroup(e: React.FormEvent) {
+    e.preventDefault();
+    setExpenseGroupLoading(true);
+    setExpenseGroupError(null);
+    if (!expenseGroupName || selectedExpenseGroupMembers.length === 0 || !primaryMemberId) {
+      setExpenseGroupError('Please provide a name, select members, and choose a primary member.');
+      setExpenseGroupLoading(false);
+      return;
+    }
+
+    // Check if primary member is already in a group
+    const isPrimaryInExistingGroup = group?.expense_groups?.some(g => 
+      g.members.includes(primaryMemberId)
+    );
+
+    if (isPrimaryInExistingGroup) {
+      setExpenseGroupError('The selected primary member is already in an expense group.');
+      setExpenseGroupLoading(false);
+      return;
+    }
+
+    try {
+      const newExpenseGroup = {
+        name: expenseGroupName,
+        primary_member_id: primaryMemberId,
+        members: selectedExpenseGroupMembers
+      };
+
+      const updatedExpenseGroups = [...(group?.expense_groups || []), newExpenseGroup];
+      
+      const { error } = await supabase
+        .from('groups')
+        .update({ expense_groups: updatedExpenseGroups })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setGroup(prev => prev ? { ...prev, expense_groups: updatedExpenseGroups } : null);
+      setExpenseGroupName('');
+      setSelectedExpenseGroupMembers([]);
+      setPrimaryMemberId('');
+      setShowExpenseGroupModal(false);
+    } catch (err) {
+      setExpenseGroupError('Failed to add expense group.');
+      console.error('Error adding expense group:', err);
+    } finally {
+      setExpenseGroupLoading(false);
+    }
+  }
+
   if (isLoading) {
     return (
       <main className="bg-main-gradient min-h-screen flex flex-col items-center px-4 py-8">
@@ -249,7 +333,13 @@ export default function GroupPage({ params }: { params: Promise<{ id: string }> 
 
   return (
     <main className="bg-main-gradient min-h-screen flex flex-col items-center px-4 pt-4 pb-8">
-      <GroupHeader name={group.name} currency={group.currency} members={group.members} />
+      <GroupHeader 
+        name={group.name} 
+        currency={group.currency} 
+        members={group.members} 
+        description={group.description}
+        urls={group.url}
+      />
 
       <AddExpenseModal
         show={showExpenseModal}
@@ -301,6 +391,8 @@ export default function GroupPage({ params }: { params: Promise<{ id: string }> 
         currency={group.currency}
         onShowDetails={() => setShowDetailsModal(true)}
         members={group.members}
+        expenseGroups={group.expense_groups || []}
+        onAddExpenseGroup={() => setShowExpenseGroupModal(true)}
       />
 
       <DetailsModal
@@ -404,6 +496,22 @@ export default function GroupPage({ params }: { params: Promise<{ id: string }> 
         setSplitBetween={setEditSplitBetween}
         isLoading={editLoading}
         error={editError}
+      />
+
+      <AddExpenseGroupModal
+        show={showExpenseGroupModal}
+        onClose={() => setShowExpenseGroupModal(false)}
+        onSubmit={handleAddExpenseGroup}
+        members={group.members}
+        name={expenseGroupName}
+        setName={setExpenseGroupName}
+        primaryMemberId={primaryMemberId}
+        setPrimaryMemberId={setPrimaryMemberId}
+        selectedMembers={selectedExpenseGroupMembers}
+        setSelectedMembers={setSelectedExpenseGroupMembers}
+        isLoading={expenseGroupLoading}
+        error={expenseGroupError}
+        existingExpenseGroups={group.expense_groups || []}
       />
     </main>
   );
