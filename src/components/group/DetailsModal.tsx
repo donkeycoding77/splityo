@@ -95,7 +95,10 @@ export default function DetailsModal({
                 ))}
                 {/* Total row */}
                 <tr className="bg-gray-50 font-bold">
-                  <td colSpan={3} className="px-2 py-1 border text-right">Total</td>
+                  <td colSpan={2} className="px-2 py-1 border text-right">Total</td>
+                  <td className="px-2 py-1 border text-right">
+                    {currency === 'USD' ? '$' : currency}{totalAmount.toFixed(2)}
+                  </td>
                   {members.map((member) => (
                     <td key={member.id} className={`px-2 py-1 border border-black text-right ${getCellColor(memberTotals[member.id])}`}>
                       {memberTotals[member.id].toFixed(2)}

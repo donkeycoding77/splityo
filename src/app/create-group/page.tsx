@@ -30,10 +30,6 @@ export default function CreateGroupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleMemberChange = (idx: number, value: string) => {
-    setMembers(members => members.map((m, i) => (i === idx ? value : m)));
-  };
-
   const handleAddMember = () => {
     const trimmed = newMember.trim();
     if (trimmed && !members.includes(trimmed)) {

@@ -110,7 +110,7 @@ export default function GroupPage({ params }: { params: Promise<{ id: string }> 
           .order('date', { ascending: false });
         if (expensesError) throw expensesError;
         // Parse split_between for each expense
-        const parsedExpenses = (expensesData || []).map((exp: any) => ({
+        const parsedExpenses = (expensesData || []).map((exp: Expense) => ({
           ...exp,
           split_between: Array.isArray(exp.split_between)
             ? exp.split_between

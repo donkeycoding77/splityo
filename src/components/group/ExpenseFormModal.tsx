@@ -7,18 +7,6 @@ interface Member {
   name: string;
 }
 
-interface Expense {
-  id: string;
-  description: string;
-  amount: number;
-  paid_by_member_id: string;
-  split_between: {
-    member_id: string;
-    amount: number;
-  }[];
-  date: string;
-}
-
 interface ExpenseFormModalProps {
   show: boolean;
   onClose: () => void;
@@ -86,7 +74,7 @@ export default function ExpenseFormModal({
       acc[m] = splitAmounts[m] || '';
       return acc;
     }, {} as Record<string, string>));
-  }, [splitBetween, members]);
+  }, [splitBetween, members, splitAmounts]);
 
   useEffect(() => {
     if (splitType === 'custom' && amount && splitBetween.length > 0) {
@@ -174,7 +162,7 @@ export default function ExpenseFormModal({
                       step="0.01"
                       value={amount}
                       onChange={e => {
-                        let val = e.target.value;
+                        const val = e.target.value;
                         // Only allow up to 2 decimal places
                         if (/^\d*(\.\d{0,2})?$/.test(val)) {
                           setAmount(val);
@@ -234,7 +222,7 @@ export default function ExpenseFormModal({
                 <div className="overflow-x-auto border-1 border-gray-400 rounded-lg px-2 bg-gray-50">
                   <table className="min-w-full border-separate border-spacing-y-2">
                     <tbody>
-                      {members.map((m, index) => {
+                      {members.map((m) => {
                         const selected = splitBetween.includes(m.id);
                         return (
                           <tr key={m.id}>

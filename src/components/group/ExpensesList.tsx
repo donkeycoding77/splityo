@@ -1,11 +1,6 @@
 import { PencilSquareIcon } from '@heroicons/react/20/solid';
 import { useState } from 'react';
 
-interface Member {
-  id: string;
-  name: string;
-}
-
 interface Expense {
   id: string;
   group_id: string;

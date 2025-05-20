@@ -38,7 +38,7 @@ export default function Home() {
           <div className="rounded-3xl bg-white p-8 shadow-xl ring-2 ring-green-200 hover:ring-pink-200 transition-all flex flex-col items-center text-center max-w-sm w-full">
             <div className="text-2xl bebas-neue-regular">🧮&nbsp;&nbsp;&nbsp;Smart Calculations</div>
             <p className="mt-2 text-gray-600 font-medium">
-              Let us handle the complex math! 🤖 We'll split everything fairly and show who owes what.
+              Let us handle the complex math! 🤖 We&apos;ll split everything fairly and show who owes what.
             </p>
           </div>
 
@@ -54,7 +54,7 @@ export default function Home() {
           <div className="rounded-3xl bg-white p-8 shadow-xl ring-2 ring-pink-200 hover:ring-orange-200 transition-all flex flex-col items-center text-center max-w-sm w-full">
             <div className="text-2xl bebas-neue-regular">🧾&nbsp;&nbsp;&nbsp;Drop Expenses</div>
             <p className="mt-2 text-gray-600 font-medium">
-              Add who paid, who's in, and what's up. We'll do the math. No cap. 🤓
+              Add who paid, who&apos;s in, and what&apos;s up. We&apos;ll do the math. No cap. 🤓
             </p>
           </div>
 

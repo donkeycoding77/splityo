@@ -12,8 +12,20 @@ interface ExpenseGroup {
   members: string[];
 }
 
+interface Expense {
+  id: string;
+  description: string;
+  amount: number;
+  paid_by_member_id: string;
+  split_between: {
+    member_id: string;
+    amount: number;
+  }[];
+  date: string;
+}
+
 interface SettlementListProps {
-  expenses: any[];
+  expenses: Expense[];
   settlements: Settlement[];
   currency: string;
   onShowDetails: () => void;
