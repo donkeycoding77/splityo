@@ -9,13 +9,15 @@ interface SettlementListProps {
   settlements: Settlement[];
   currency: string;
   onShowDetails: () => void;
+  members: { id: string; name: string }[];
 }
 
 export default function SettlementList({
   expenses,
   settlements,
   currency,
-  onShowDetails
+  onShowDetails,
+  members
 }: SettlementListProps) {
   return (
     <div className="w-full max-w-md card shadow-2xl mt-6">
@@ -40,9 +42,9 @@ export default function SettlementList({
               {settlements.map((s, i) => (
                 <li key={i} className="py-2 flex justify-between items-center">
                   <span>
-                    <span className="font-bold">{expenses.find(e => e.paid_by_member_id === s.from)?.paid_by?.name || s.from}</span>
+                    <span className="font-bold">{members.find(m => m.id === s.from)?.name || 'Unknown'}</span>
                     <span className="mx-2">→</span>
-                    <span className="font-bold">{expenses.find(e => e.paid_by_member_id === s.to)?.paid_by?.name || s.to}</span>
+                    <span className="font-bold">{members.find(m => m.id === s.to)?.name || 'Unknown'}</span>
                   </span>
                   <span className="font-bold text-pink-500">
                     {currency === 'USD' ? '$' : currency}{s.amount.toFixed(2)}

@@ -292,6 +292,7 @@ export default function GroupPage({ params }: { params: Promise<{ id: string }> 
           setDate(new Date().toISOString().split('T')[0]);
           setShowExpenseModal(true);
         }}
+        members={group.members}
       />
 
       <SettlementList
@@ -299,6 +300,7 @@ export default function GroupPage({ params }: { params: Promise<{ id: string }> 
         settlements={settlements}
         currency={group.currency}
         onShowDetails={() => setShowDetailsModal(true)}
+        members={group.members}
       />
 
       <DetailsModal

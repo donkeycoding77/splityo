@@ -119,35 +119,6 @@ export default function ExpenseFormModal({
           <h2 className="text-xl font-bold mb-2 text-green-500">{title}</h2>
           <form className="flex flex-col gap-4" onSubmit={onSubmit}>
             <div>
-              <label className="block font-semibold mb-1">Paid by</label>
-              <Menu as="div" className="relative w-full">
-                <Menu.Button
-                  className="input-main bg-white flex justify-between items-center w-full px-4 py-2 text-left font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-pink-300"
-                  disabled={isLoading}
-                >
-                  <span>{members.find(m => m.id === payer) ? `${members.findIndex(m => m.id === payer) + 1}: ${members.find(m => m.id === payer)?.name}` : 'Select member'}</span>
-                  <ChevronDownIcon className="w-4 h-4 text-gray-400 ml-2" aria-hidden="true" />
-                </Menu.Button>
-                <Menu.Items className="absolute z-10 mt-1 w-full origin-top-left rounded-xl bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
-                  <div className="py-1">
-                    {members.map((m, index) => (
-                      <Menu.Item key={m.id}>
-                        {({ active }) => (
-                          <button
-                            type="button"
-                            className={`block w-full text-left px-4 py-2 text-base font-medium text-gray-700 transition-colors ${active ? 'bg-green-50 text-green-600' : ''}`}
-                            onClick={() => setPayer(m.id)}
-                          >
-                            {`${index + 1}: ${m.name}`}
-                          </button>
-                        )}
-                      </Menu.Item>
-                    ))}
-                  </div>
-                </Menu.Items>
-              </Menu>
-            </div>
-            <div>
               <label className="block font-semibold mb-1">Description</label>
               <input
                 className="input-main"
@@ -158,6 +129,37 @@ export default function ExpenseFormModal({
                 disabled={isLoading}
                 placeholder="e.g. Uber"
               />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <label className="font-semibold">Paid by</label>
+                <Menu as="div" className="relative flex-1">
+                  <Menu.Button
+                    className="input-main bg-white flex justify-between items-center w-full px-4 py-2 text-left font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-pink-300"
+                    disabled={isLoading}
+                  >
+                    <span>{members.find(m => m.id === payer)?.name || 'Select member'}</span>
+                    <ChevronDownIcon className="w-4 h-4 text-gray-400 ml-2" aria-hidden="true" />
+                  </Menu.Button>
+                  <Menu.Items className="absolute z-10 mt-1 w-full origin-top-left rounded-xl bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
+                    <div className="py-1">
+                      {members.map((m) => (
+                        <Menu.Item key={m.id}>
+                          {({ active }) => (
+                            <button
+                              type="button"
+                              className={`block w-full text-left px-4 py-2 text-base font-medium text-gray-700 transition-colors ${active ? 'bg-green-50 text-green-600' : ''}`}
+                              onClick={() => setPayer(m.id)}
+                            >
+                              {m.name}
+                            </button>
+                          )}
+                        </Menu.Item>
+                      ))}
+                    </div>
+                  </Menu.Items>
+                </Menu>
+              </div>
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -258,7 +260,7 @@ export default function ExpenseFormModal({
                                       : 'bg-white border-orange-300')
                                   }
                                 >
-                                  {`${index + 1}: ${m.name}`}
+                                  {m.name}
                                 </span>
                                 <input
                                   type="number"
@@ -284,23 +286,23 @@ export default function ExpenseFormModal({
             </div>
             {error && <div className="text-red-500 text-sm">{error}</div>}
             <div className={`flex gap-2 mt-2 ${onDelete ? '' : 'flex-col'}`}>
-              <button
-                type="submit"
-                className="btn-main w-full bebas-neue-regular"
-                disabled={isLoading}
-              >
-                {isLoading ? 'Saving...' : submitText}
-              </button>
               {onDelete && (
                 <button
                   type="button"
-                  className="w-full rounded-full border border-red-400 text-red-500 font-bold py-2 bebas-neue-regular hover:bg-red-50 transition-colors"
+                  className="bg-red-500 hover:bg-red-600 text-white rounded-full font-semibold text-sm py-2 px-4 transition-colors w-full"
                   disabled={isLoading}
                   onClick={onDelete}
                 >
                   Delete
                 </button>
               )}
+              <button
+                type="submit"
+                className="bg-green-500 hover:bg-green-600 text-white rounded-full font-semibold text-sm py-2 px-4 transition-colors w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Saving...' : submitText}
+              </button>
             </div>
           </form>
         </div>
