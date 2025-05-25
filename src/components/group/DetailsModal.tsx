@@ -45,7 +45,7 @@ export default function DetailsModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-main-gradient bg-opacity-90 px-4 sm:px-0 overflow-y-auto">
       <div className="w-full max-w-4xl relative max-h-[90vh]">
-        <div className="card border-1 shadow-2xl relative">
+        <div className="card shadow-2xl relative">
           <button
             className="absolute top-4 right-4 text-gray-400 hover:text-pink-500 text-2xl font-bold focus:outline-none"
             onClick={onClose}
@@ -53,7 +53,10 @@ export default function DetailsModal({
           >
             ×
           </button>
-          <h2 className="text-xl font-bold mb-4 text-green-500">Expense Details</h2>
+          <h2 className="text-xl font-bold mb-2 text-pink-500">Expense Details</h2>
+          <p className="text-gray-500 text-sm mb-4">
+            Each row shows how much each person paid (<span className="text-green-600 font-medium">positive</span>) or owes (<span className="text-red-600 font-medium">negative</span>) for that expense. The total row shows the final balance for each person.
+          </p>
           <div className="overflow-x-auto">
             <table className="min-w-full border text-sm">
               <thead>

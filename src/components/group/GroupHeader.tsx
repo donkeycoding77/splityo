@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { useState } from 'react';
+import ShareModal from './ShareModal';
 
 interface Member {
   id: string;
@@ -14,6 +16,8 @@ interface GroupHeaderProps {
 }
 
 export default function GroupHeader({ name, currency, members, description, urls }: GroupHeaderProps) {
+  const [showShareModal, setShowShareModal] = useState(false);
+
   return (
     <>
       <Link href="/" className="inline-flex items-center gap-2 text-green-500 hover:text-pink-500 font-bold text-lg transition-colors">
@@ -29,7 +33,18 @@ export default function GroupHeader({ name, currency, members, description, urls
       <div className="w-full max-w-md card shadow-2xl mt-4">
         <div className="flex items-center justify-between mb-1">
           <h2 className="text-2xl font-bold text-orange-400">{name}</h2>
-          <span className="ml-2 px-2 py-1 rounded-xl border border-gray-100 text-orange-400 text-base shadow-sm">{currency}</span>
+          <div className="flex items-center gap-2">
+            <span className="py-1 font-bold text-gray-400 text-base">{currency}</span>
+            <button
+              onClick={() => setShowShareModal(true)}
+              className="text-gray-400 hover:text-orange-500 transition-colors"
+              title="Share group"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+            </button>
+          </div>
         </div>
         <div className="space-y-2">
           {description && (
@@ -67,6 +82,12 @@ export default function GroupHeader({ name, currency, members, description, urls
           </div>
         </div>
       </div>
+
+      <ShareModal
+        show={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        url={typeof window !== 'undefined' ? window.location.href : ''}
+      />
     </>
   );
 } 

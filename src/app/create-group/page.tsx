@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Menu } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { supabase } from '@/lib/supabase';
+import Footer from '@/components/Footer';
 
 const currencyOptions = [
   { label: 'US Dollar ($)', value: '$' },
@@ -101,7 +102,8 @@ export default function CreateGroupPage() {
   };
 
   return (
-    <main className="bg-main-gradient min-h-screen flex flex-col items-center px-4 py-8 font-sans">
+    <>
+      <main className="bg-main-gradient min-h-screen flex flex-col items-center px-4 py-8 font-sans">
         <h1 className="text-5xl font-extrabold tracking-tight text-gray-900 sm:text-6xl flex items-center justify-center bebas-neue-regular">
         <span className="text-2xl sm:text-4xl">💸&nbsp;&nbsp;</span>
         <span className="text-pink-500">split</span>
@@ -291,5 +293,7 @@ export default function CreateGroupPage() {
             </form>
         </div>
     </main>
+    <Footer />
+    </>
   );
 } 

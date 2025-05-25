@@ -9,6 +9,7 @@ import SettlementList from '@/components/group/SettlementList';
 import DetailsModal from '@/components/group/DetailsModal';
 import EditExpenseModal from '@/components/group/EditExpenseModal';
 import AddExpenseGroupModal from '@/components/group/AddExpenseGroupModal';
+import Footer from '@/components/Footer';
 
 interface Member {
   id: string;
@@ -102,6 +103,17 @@ export default function GroupPage({ params }: { params: Promise<{ id: string }> 
         setGroup(groupData);
         setPayer(groupData.members[0]?.id || '');
         setSplitBetween(groupData.members.map((m: Member) => m.id));
+        // Store in localStorage as recently visited group
+        if (typeof window !== 'undefined') {
+          const prev = JSON.parse(localStorage.getItem('previousGroups') || '[]');
+          // Remove if already present
+          const filtered = prev.filter((g: {id: string}) => g.id !== groupData.id);
+          // Add to front
+          filtered.unshift({ id: groupData.id, name: groupData.name });
+          // Limit to 5
+          const limited = filtered.slice(0, 5);
+          localStorage.setItem('previousGroups', JSON.stringify(limited));
+        }
         // Fetch expenses
         const { data: expensesData, error: expensesError } = await supabase
           .from('expenses')
@@ -265,8 +277,8 @@ export default function GroupPage({ params }: { params: Promise<{ id: string }> 
     e.preventDefault();
     setExpenseGroupLoading(true);
     setExpenseGroupError(null);
-    if (!expenseGroupName || selectedExpenseGroupMembers.length === 0 || !primaryMemberId) {
-      setExpenseGroupError('Please provide a name, select members, and choose a primary member.');
+    if (!expenseGroupName || selectedExpenseGroupMembers.length < 2 || !primaryMemberId) {
+      setExpenseGroupError('Please provide a name, select at least 2 members, and choose a primary member.');
       setExpenseGroupLoading(false);
       return;
     }
@@ -332,187 +344,209 @@ export default function GroupPage({ params }: { params: Promise<{ id: string }> 
   }
 
   return (
-    <main className="bg-main-gradient min-h-screen flex flex-col items-center px-4 pt-4 pb-8">
-      <GroupHeader 
-        name={group.name} 
-        currency={group.currency} 
-        members={group.members} 
-        description={group.description}
-        urls={group.url}
-      />
+    <>
+      <main className="bg-main-gradient min-h-screen flex flex-col items-center px-4 pt-4 pb-8">
+        <GroupHeader 
+          name={group.name} 
+          currency={group.currency} 
+          members={group.members} 
+          description={group.description}
+          urls={group.url}
+        />
 
-      <AddExpenseModal
-        show={showExpenseModal}
-        onClose={() => setShowExpenseModal(false)}
-        onSubmit={handleAddExpense}
-        members={group.members}
-        currency={group.currency}
-        payer={payer}
-        setPayer={setPayer}
-        description={description}
-        setDescription={setDescription}
-        amount={amount}
-        setAmount={setAmount}
-        date={date}
-        setDate={setDate}
-        splitType={splitType}
-        setSplitType={setSplitType}
-        splitBetween={splitBetween}
-        setSplitBetween={setSplitBetween}
-        isLoading={expenseLoading}
-        error={expenseError}
-      />
+        <AddExpenseModal
+          show={showExpenseModal}
+          onClose={() => setShowExpenseModal(false)}
+          onSubmit={handleAddExpense}
+          members={group.members}
+          currency={group.currency}
+          payer={payer}
+          setPayer={setPayer}
+          description={description}
+          setDescription={setDescription}
+          amount={amount}
+          setAmount={setAmount}
+          date={date}
+          setDate={setDate}
+          splitType={splitType}
+          setSplitType={setSplitType}
+          splitBetween={splitBetween}
+          setSplitBetween={setSplitBetween}
+          isLoading={expenseLoading}
+          error={expenseError}
+        />
 
-      <ExpensesList
-        expenses={expenses}
-        currency={group.currency}
-        showAllExpenses={showAllExpenses}
-        onToggleShowAll={() => setShowAllExpenses(v => !v)}
-        onEditExpense={(expense) => {
-          setSelectedExpense(expense);
-          setEditPayer(expense.paid_by_member_id);
-          setEditDescription(expense.description);
-          setEditAmount(expense.amount.toString());
-          setEditDate(expense.date);
-          setEditSplitBetween(expense.split_between.map(s => s.member_id));
-          setEditError(null);
-          setShowEditExpenseModal(true);
-        }}
-        onAddExpense={() => {
-          setDate(new Date().toISOString().split('T')[0]);
-          setShowExpenseModal(true);
-        }}
-        members={group.members}
-      />
+        <ExpensesList
+          expenses={expenses}
+          currency={group.currency}
+          showAllExpenses={showAllExpenses}
+          onToggleShowAll={() => setShowAllExpenses(v => !v)}
+          onEditExpense={(expense) => {
+            setSelectedExpense(expense);
+            setEditPayer(expense.paid_by_member_id);
+            setEditDescription(expense.description);
+            setEditAmount(expense.amount.toString());
+            setEditDate(expense.date);
+            setEditSplitBetween(expense.split_between.map(s => s.member_id));
+            setEditError(null);
+            setShowEditExpenseModal(true);
+          }}
+          onAddExpense={() => {
+            setDate(new Date().toISOString().split('T')[0]);
+            setShowExpenseModal(true);
+          }}
+          members={group.members}
+        />
 
-      <SettlementList
-        expenses={expenses}
-        settlements={settlements}
-        currency={group.currency}
-        onShowDetails={() => setShowDetailsModal(true)}
-        members={group.members}
-        expenseGroups={group.expense_groups || []}
-        onAddExpenseGroup={() => setShowExpenseGroupModal(true)}
-      />
+        <SettlementList
+          expenses={expenses}
+          settlements={settlements}
+          currency={group.currency}
+          onShowDetails={() => setShowDetailsModal(true)}
+          members={group.members}
+          expenseGroups={group.expense_groups || []}
+          onAddExpenseGroup={() => setShowExpenseGroupModal(true)}
+          onDeleteExpenseGroup={async (groupToDelete) => {
+            try {
+              const updatedExpenseGroups = group.expense_groups.filter(g => 
+                g.primary_member_id !== groupToDelete.primary_member_id
+              );
+              
+              const { error } = await supabase
+                .from('groups')
+                .update({ expense_groups: updatedExpenseGroups })
+                .eq('id', id);
 
-      <DetailsModal
-        show={showDetailsModal}
-        onClose={() => setShowDetailsModal(false)}
-        expenses={expenses}
-        members={group.members}
-        currency={group.currency}
-        totalAmount={totalAmount}
-        memberTotals={memberTotals}
-      />
+              if (error) throw error;
 
-      <EditExpenseModal
-        show={showEditExpenseModal}
-        onClose={() => setShowEditExpenseModal(false)}
-        onSubmit={async (e) => {
-          e.preventDefault();
-          setEditLoading(true);
-          setEditError(null);
-          if (!editPayer || !editDescription || !editAmount || !editDate || editSplitBetween.length === 0) {
-            setEditError('Please fill all fields and select at least one member to split.');
-            setEditLoading(false);
-            return;
-          }
-          try {
-            const amountValue = parseFloat(editAmount);
-            const share = amountValue / editSplitBetween.length;
-            const splitBetweenData = editSplitBetween.map(memberId => ({
-              member_id: memberId,
-              amount: share
-            }));
+              setGroup(prev => prev ? { ...prev, expense_groups: updatedExpenseGroups } : null);
+            } catch (err) {
+              console.error('Error deleting expense group:', err);
+            }
+          }}
+          groupName={group.name}
+        />
 
-            const { error } = await supabase
-              .from('expenses')
-              .update({
-                paid_by_member_id: editPayer,
-                description: editDescription,
-                amount: amountValue,
-                split_between: splitBetweenData,
-                date: editDate,
-                created_at: new Date().toISOString(),
-              })
-              .eq('id', selectedExpense!.id);
-            if (error) throw error;
-            // Refresh expenses
-            const { data: expensesData, error: expensesError } = await supabase
-              .from('expenses')
-              .select('*')
-              .eq('group_id', selectedExpense!.group_id)
-              .order('date', { ascending: false });
-            if (expensesError) throw expensesError;
-            setExpenses(expensesData || []);
-            setShowEditExpenseModal(false);
-          } catch (err) {
-            setEditError('Failed to update expense.');
-            console.error('Error updating expense:', err);
-          } finally {
-            setEditLoading(false);
-          }
-        }}
-        onDelete={async () => {
-          if (!window.confirm('Are you sure you want to delete this expense?')) return;
-          setEditLoading(true);
-          setEditError(null);
-          try {
-            const { error } = await supabase
-              .from('expenses')
-              .delete()
-              .eq('id', selectedExpense!.id);
-            if (error) throw error;
-            // Refresh expenses
-            const { data: expensesData, error: expensesError } = await supabase
-              .from('expenses')
-              .select('*')
-              .eq('group_id', selectedExpense!.group_id)
-              .order('date', { ascending: false });
-            if (expensesError) throw expensesError;
-            setExpenses(expensesData || []);
-            setShowEditExpenseModal(false);
-          } catch (err) {
-            setEditError('Failed to delete expense.');
-            console.error('Error deleting expense:', err);
-          } finally {
-            setEditLoading(false);
-          }
-        }}
-        expense={selectedExpense}
-        members={group.members}
-        currency={group.currency}
-        payer={editPayer}
-        setPayer={setEditPayer}
-        description={editDescription}
-        setDescription={setEditDescription}
-        amount={editAmount}
-        setAmount={setEditAmount}
-        date={editDate}
-        setDate={setEditDate}
-        splitType={editSplitType}
-        setSplitType={setEditSplitType}
-        splitBetween={editSplitBetween}
-        setSplitBetween={setEditSplitBetween}
-        isLoading={editLoading}
-        error={editError}
-      />
+        <DetailsModal
+          show={showDetailsModal}
+          onClose={() => setShowDetailsModal(false)}
+          expenses={expenses}
+          members={group.members}
+          currency={group.currency}
+          totalAmount={totalAmount}
+          memberTotals={memberTotals}
+        />
 
-      <AddExpenseGroupModal
-        show={showExpenseGroupModal}
-        onClose={() => setShowExpenseGroupModal(false)}
-        onSubmit={handleAddExpenseGroup}
-        members={group.members}
-        name={expenseGroupName}
-        setName={setExpenseGroupName}
-        primaryMemberId={primaryMemberId}
-        setPrimaryMemberId={setPrimaryMemberId}
-        selectedMembers={selectedExpenseGroupMembers}
-        setSelectedMembers={setSelectedExpenseGroupMembers}
-        isLoading={expenseGroupLoading}
-        error={expenseGroupError}
-        existingExpenseGroups={group.expense_groups || []}
-      />
-    </main>
+        <EditExpenseModal
+          show={showEditExpenseModal}
+          onClose={() => setShowEditExpenseModal(false)}
+          onSubmit={async (e) => {
+            e.preventDefault();
+            setEditLoading(true);
+            setEditError(null);
+            if (!editPayer || !editDescription || !editAmount || !editDate || editSplitBetween.length === 0) {
+              setEditError('Please fill all fields and select at least one member to split.');
+              setEditLoading(false);
+              return;
+            }
+            try {
+              const amountValue = parseFloat(editAmount);
+              const share = amountValue / editSplitBetween.length;
+              const splitBetweenData = editSplitBetween.map(memberId => ({
+                member_id: memberId,
+                amount: share
+              }));
+
+              const { error } = await supabase
+                .from('expenses')
+                .update({
+                  paid_by_member_id: editPayer,
+                  description: editDescription,
+                  amount: amountValue,
+                  split_between: splitBetweenData,
+                  date: editDate,
+                  created_at: new Date().toISOString(),
+                })
+                .eq('id', selectedExpense!.id);
+              if (error) throw error;
+              // Refresh expenses
+              const { data: expensesData, error: expensesError } = await supabase
+                .from('expenses')
+                .select('*')
+                .eq('group_id', selectedExpense!.group_id)
+                .order('date', { ascending: false });
+              if (expensesError) throw expensesError;
+              setExpenses(expensesData || []);
+              setShowEditExpenseModal(false);
+            } catch (err) {
+              setEditError('Failed to update expense.');
+              console.error('Error updating expense:', err);
+            } finally {
+              setEditLoading(false);
+            }
+          }}
+          onDelete={async () => {
+            if (!window.confirm('Are you sure you want to delete this expense?')) return;
+            setEditLoading(true);
+            setEditError(null);
+            try {
+              const { error } = await supabase
+                .from('expenses')
+                .delete()
+                .eq('id', selectedExpense!.id);
+              if (error) throw error;
+              // Refresh expenses
+              const { data: expensesData, error: expensesError } = await supabase
+                .from('expenses')
+                .select('*')
+                .eq('group_id', selectedExpense!.group_id)
+                .order('date', { ascending: false });
+              if (expensesError) throw expensesError;
+              setExpenses(expensesData || []);
+              setShowEditExpenseModal(false);
+            } catch (err) {
+              setEditError('Failed to delete expense.');
+              console.error('Error deleting expense:', err);
+            } finally {
+              setEditLoading(false);
+            }
+          }}
+          expense={selectedExpense}
+          members={group.members}
+          currency={group.currency}
+          payer={editPayer}
+          setPayer={setEditPayer}
+          description={editDescription}
+          setDescription={setEditDescription}
+          amount={editAmount}
+          setAmount={setEditAmount}
+          date={editDate}
+          setDate={setEditDate}
+          splitType={editSplitType}
+          setSplitType={setEditSplitType}
+          splitBetween={editSplitBetween}
+          setSplitBetween={setEditSplitBetween}
+          isLoading={editLoading}
+          error={editError}
+        />
+
+        <AddExpenseGroupModal
+          show={showExpenseGroupModal}
+          onClose={() => setShowExpenseGroupModal(false)}
+          onSubmit={handleAddExpenseGroup}
+          members={group.members}
+          name={expenseGroupName}
+          setName={setExpenseGroupName}
+          primaryMemberId={primaryMemberId}
+          setPrimaryMemberId={setPrimaryMemberId}
+          selectedMembers={selectedExpenseGroupMembers}
+          setSelectedMembers={setSelectedExpenseGroupMembers}
+          isLoading={expenseGroupLoading}
+          error={expenseGroupError}
+          existingExpenseGroups={group.expense_groups || []}
+        />
+      </main>
+      <Footer />
+    </>
   );
 } 

@@ -70,11 +70,14 @@ export default function ExpenseFormModal({
   }, [show]);
 
   useEffect(() => {
-    setSplitAmounts(splitBetween.reduce((acc, m) => {
-      acc[m] = splitAmounts[m] || '';
+    setSplitAmounts((prev: Record<string, string>) => {
+      const acc: Record<string, string> = {};
+      (splitBetween as string[]).forEach(m => {
+        acc[m] = prev[m] || '';
+      });
       return acc;
-    }, {} as Record<string, string>));
-  }, [splitBetween, members, splitAmounts]);
+    });
+  }, [splitBetween, members]);
 
   useEffect(() => {
     if (splitType === 'custom' && amount && splitBetween.length > 0) {
@@ -96,7 +99,7 @@ export default function ExpenseFormModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-main-gradient bg-opacity-90 px-4 sm:px-0 overflow-y-auto">
       <div className="w-full max-w-md relative max-h-[90vh]">
-        <div className="card border-1 shadow-2xl relative">
+        <div className="card shadow-2xl relative">
           <button
             className="absolute top-4 right-4 text-gray-400 hover:text-pink-500 text-2xl font-bold focus:outline-none"
             onClick={onClose}

@@ -1,4 +1,6 @@
 import { PlusIcon } from '@heroicons/react/20/solid';
+import { useState } from 'react';
+import ShareSettlementModal from './ShareSettlementModal';
 
 interface Settlement {
   from: string;
@@ -32,6 +34,8 @@ interface SettlementListProps {
   members: { id: string; name: string }[];
   expenseGroups: ExpenseGroup[];
   onAddExpenseGroup: () => void;
+  onDeleteExpenseGroup: (group: ExpenseGroup) => void;
+  groupName: string;
 }
 
 export default function SettlementList({
@@ -41,11 +45,26 @@ export default function SettlementList({
   onShowDetails,
   members,
   expenseGroups,
-  onAddExpenseGroup
+  onAddExpenseGroup,
+  onDeleteExpenseGroup,
+  groupName
 }: SettlementListProps) {
+  const [showShareModal, setShowShareModal] = useState(false);
+
   return (
     <div className="w-full max-w-md card shadow-2xl mt-6">
-      <h2 className="text-xl font-bold mb-2 text-pink-500">Settle Up</h2>
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="text-xl font-bold text-pink-500">Settle Up</h2>
+        <button
+          onClick={() => setShowShareModal(true)}
+          className="text-gray-400 hover:text-pink-500 transition-colors"
+          title="Share settlement"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+          </svg>
+        </button>
+      </div>
       {expenses.length === 0 ? (
         <div>
           <div className="text-center text-gray-400 py-4 text-lg font-semibold">
@@ -117,13 +136,23 @@ export default function SettlementList({
                 .map(id => members.find(m => m.id === id)?.name || 'Unknown');
               return (
                 <li key={group.primary_member_id} className="py-1">
-                  <div className="flex items-center gap-2">
-                    <div className="font-bold text-gray-800 text-base">{group.name}:</div>
-                    <div className="text-sm text-gray-700">
-                      <span className="font-semibold text-gray-500">{primaryMember?.name}</span>
-                      <span> pays for </span>
-                      <span>{dependentMembers.join(', ')}</span>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className="font-bold text-gray-800 text-base">{group.name}:</div>
+                      <div className="text-sm text-gray-700">
+                        <span className="font-bold text-gray-500">{primaryMember?.name}, </span>
+                        <span>{dependentMembers.join(', ')}</span>
+                      </div>
                     </div>
+                    <button
+                      onClick={() => onDeleteExpenseGroup(group)}
+                      className="text-gray-400 hover:text-red-500 transition-colors"
+                      title="Delete expense group"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
                   </div>
                 </li>
               );
@@ -135,6 +164,15 @@ export default function SettlementList({
           </div>
         )}
       </div>
+
+      <ShareSettlementModal
+        show={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        settlements={settlements}
+        members={members}
+        currency={currency}
+        groupName={groupName}
+      />
     </div>
   );
 } 
