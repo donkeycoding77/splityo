@@ -7,6 +7,7 @@ import { Menu } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { supabase } from '@/lib/supabase';
 import Footer from '@/components/Footer';
+import Logo from '@/components/common/Logo';
 
 const currencyOptions = [
   { label: 'US Dollar ($)', value: '$' },
@@ -104,13 +105,8 @@ export default function CreateGroupPage() {
   return (
     <>
       <main className="bg-main-gradient min-h-screen flex flex-col items-center px-4 py-8 font-sans">
-        <h1 className="text-5xl font-extrabold tracking-tight text-gray-900 sm:text-6xl flex items-center justify-center bebas-neue-regular">
-        <span className="text-2xl sm:text-4xl">💸&nbsp;&nbsp;</span>
-        <span className="text-pink-500">split</span>
-        <span>yo</span>
-        <span className="text-green-500">.cash</span>
-        <span className="text-2xl sm:text-4xl">&nbsp;&nbsp;💸</span>
-        </h1>
+
+        <Logo />
 
         <div className="w-full max-w-md mt-2">
             <Link href="/" className="inline-flex items-center gap-2 text-green-500 hover:text-pink-500 font-bold text-lg transition-colors">
@@ -177,7 +173,7 @@ export default function CreateGroupPage() {
             <label className="block text-base font-bold mb-1 text-gray-800">
               Members <span className="text-orange-400">*</span>
             </label>
-            <div className="flex w-full">
+            <div className="flex w-full gap-x-2">
               <input
                 type="text"
                 className="input-main flex-1 border-0"

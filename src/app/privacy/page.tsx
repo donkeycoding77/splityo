@@ -1,8 +1,17 @@
 "use client";
+
+import Link from "next/link";
+import Logo from "@/components/common/Logo";
+
 export default function PrivacyPolicy() {
   return (
-    <main className="min-h-screen bg-main-gradient flex flex-col items-center px-4 py-12">
+    <main className="min-h-screen bg-main-gradient flex flex-col items-center px-4 pt-6 pb-12">
+      <Logo />
+
       <div className="max-w-2xl w-full">
+        <Link href="/" className="inline-flex mb-4 gap-2 text-green-500 hover:text-pink-500 font-bold text-lg transition-colors">
+          <span className="text-2xl">←</span> Back
+        </Link>
         <h1 className="text-4xl font-extrabold text-pink-500 mb-4">Privacy Policy</h1>
         <p className="text-gray-500 text-sm mb-6">Last updated: May 25, 2025</p>
         <p className="text-gray-700 mb-4">This Privacy Policy describes Our policies and procedures on the collection, use and disclosure of Your information when You use the Service and tells You about Your privacy rights and how the law protects You.</p>
@@ -147,6 +156,9 @@ export default function PrivacyPolicy() {
         <ul className="list-disc list-inside mb-4 text-gray-700 space-y-2">
           <li>By email: splityocash@gmail.com</li>
         </ul>
+        <Link href="/" className="inline-flex mt-4 gap-2 text-green-500 hover:text-pink-500 font-bold text-lg transition-colors">
+          <span className="text-2xl">←</span> Back
+        </Link>
       </div>
     </main>
   );

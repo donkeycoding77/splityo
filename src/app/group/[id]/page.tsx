@@ -10,6 +10,7 @@ import DetailsModal from '@/components/group/DetailsModal';
 import EditExpenseModal from '@/components/group/EditExpenseModal';
 import AddExpenseGroupModal from '@/components/group/AddExpenseGroupModal';
 import Footer from '@/components/Footer';
+import Logo from '@/components/common/Logo';
 
 interface Member {
   id: string;
@@ -346,6 +347,7 @@ export default function GroupPage({ params }: { params: Promise<{ id: string }> 
   return (
     <>
       <main className="bg-main-gradient min-h-screen flex flex-col items-center px-4 pt-4 pb-8">
+        <Logo />
         <GroupHeader 
           name={group.name} 
           currency={group.currency} 

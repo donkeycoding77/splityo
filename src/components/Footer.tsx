@@ -7,10 +7,9 @@ export default function Footer() {
       {/* Fade to black overlay at the bottom */}
       <div className="pointer-events-none absolute left-0 right-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-black/80 z-10 w-full" />
       <div className="w-full flex flex-col items-center justify-end pt-8 pb-4 min-h-[80px] z-20 relative">
-        <div className="flex flex-col items-center gap-1 text-sm text-white/60 w-full">
-          <Link href="/privacy" className="hover:text-pink-100 transition-colors">Privacy Policy</Link>
-          <Link href="/terms" className="hover:text-pink-100 transition-colors">Terms of Service</Link>
-          <Link href="/contact" className="hover:text-pink-100 transition-colors">Contact</Link>
+        <div className="flex flex-row items-center justify-center gap-x-8 text-sm text-white w-full">
+          <Link href="/privacy" className="hover:text-green-400 transition-colors">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-green-400 transition-colors">Terms of Service</Link>
         </div>
       </div>
     </div>

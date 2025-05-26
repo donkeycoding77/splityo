@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { useState } from 'react';
 import ShareModal from './ShareModal';
 
@@ -20,16 +19,6 @@ export default function GroupHeader({ name, currency, members, description, urls
 
   return (
     <>
-      <Link href="/" className="inline-flex items-center gap-2 text-green-500 hover:text-pink-500 font-bold text-lg transition-colors">
-        <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-6xl flex items-center justify-center bebas-neue-regular">
-          <span className="text-2xl sm:text-4xl">💸&nbsp;&nbsp;</span>
-          <span className="text-pink-500">split</span>
-          <span>yo</span>
-          <span className="text-green-500">.cash</span>
-          <span className="text-2xl sm:text-4xl">&nbsp;&nbsp;💸</span>
-        </h1>
-      </Link>
-
       <div className="w-full max-w-md card shadow-2xl mt-4">
         <div className="flex items-center justify-between mb-1">
           <h2 className="text-2xl font-bold text-orange-400">{name}</h2>

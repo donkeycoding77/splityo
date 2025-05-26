@@ -1,4 +1,6 @@
 "use client";
+import Logo from '@/components/common/Logo';
+import Footer from '@/components/Footer';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -32,10 +34,11 @@ export default function Home() {
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/80 to-transparent z-0" />
         <div className="relative z-10 w-full max-w-7xl mx-auto sm:px-6 lg:px-8 px-5">
           <br /> <br />
-          <h1 className="text-5xl py-4 font-extrabold tracking-tight text-gray-900 sm:text-6xl flex items-center justify-center gap-0 bebas-neue-regular">
-            <span className="text-2xl sm:text-4xl">💸&nbsp;&nbsp;</span><span className="text-pink-500">split</span><span>yo</span><span className="text-green-500">.cash</span><span className="text-2xl sm:text-4xl">&nbsp;&nbsp;💸</span>
-          </h1>
+          
           <div className="text-center">
+            <div className="flex justify-center">
+              <Logo className="scale-150 sm:scale-125 pb-2" />
+            </div>
             <p className="sm:text-xl font-medium italic">
               The <span className="text-pink-500">easy</span> way to split money with your crew! 
             </p>
@@ -141,18 +144,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Footer Section for legal and contact links */}
-          <div className="relative w-full flex flex-col items-center p-0 m-0">
-            {/* Fade to black overlay at the bottom */}
-            <div className="pointer-events-none absolute left-0 right-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-black/80 z-10 w-full" />
-            <div className="w-full flex flex-col items-center justify-end pt-8 pb-4 min-h-[80px] z-20 relative">
-              <div className="flex flex-col items-center gap-1 text-sm text-white/60 w-full">
-                <Link href="/privacy" className="hover:text-pink-100 transition-colors">Privacy Policy</Link>
-                <Link href="/terms" className="hover:text-pink-100 transition-colors">Terms of Service</Link>
-                <Link href="/contact" className="hover:text-pink-100 transition-colors">Contact</Link>
-              </div>
-            </div>
-          </div>
+          <Footer />
         </div>
       </div>
     </main>
