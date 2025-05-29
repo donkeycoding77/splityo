@@ -50,6 +50,7 @@ export default function SettlementList({
   groupName
 }: SettlementListProps) {
   const [showShareModal, setShowShareModal] = useState(false);
+  const [isExpenseGroupsExpanded, setIsExpenseGroupsExpanded] = useState(false);
 
   return (
     <div className="w-full max-w-md card shadow-2xl mt-6">
@@ -109,59 +110,82 @@ export default function SettlementList({
 
       {/* Expense Groups Section */}
       <div className="mt-2 pt-2 border-t border-gray-200">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="text-lg font-bold text-pink-500">Expense Groups</h3>
-          <button
-            className="bg-pink-500 hover:bg-pink-600 text-white rounded-full font-semibold text-sm py-1 px-4 transition-colors flex items-center gap-1"
-            onClick={onAddExpenseGroup}
-          >
-            <PlusIcon className="w-4 h-4" />
-            New Group
-          </button>
+        <div 
+          className="flex justify-between items-center mb-2 cursor-pointer"
+          onClick={() => setIsExpenseGroupsExpanded(!isExpenseGroupsExpanded)}
+        >
+          <h3 className="text-lg font-bold text-pink-500 flex items-center gap-2">
+            Expense Groups
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              className={`h-5 w-5 transition-transform ${isExpenseGroupsExpanded ? 'rotate-180' : ''}`} 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </h3>
+          {isExpenseGroupsExpanded && (
+            <button
+              className="bg-pink-500 hover:bg-pink-600 text-white rounded-full font-semibold text-sm py-1 px-4 transition-colors flex items-center gap-1"
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddExpenseGroup();
+              }}
+            >
+              <PlusIcon className="w-4 h-4" />
+              New Group
+            </button>
+          )}
         </div>
-        {expenseGroups.length === 0 ? (
-          <div className="">
-            <p className="text-gray-400 text-center pt-2 pb-4 text-md font-semibold">No expense groups</p>
-            <p className="text-gray-500 text-sm">
-              Perfect for couples, families, or roommates - designate one person as the primary payer.
-            </p>
-          </div>
-        ) : (
-          <div>
-          <ul className="divide-y divide-gray-200">
-            {expenseGroups.map((group) => {
-              const primaryMember = members.find(m => m.id === group.primary_member_id);
-              const dependentMembers = group.members
-                .filter(id => id !== group.primary_member_id)
-                .map(id => members.find(m => m.id === id)?.name || 'Unknown');
-              return (
-                <li key={group.primary_member_id} className="py-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <div className="font-bold text-gray-800 text-base">{group.name}:</div>
-                      <div className="text-sm text-gray-700">
-                        <span className="font-bold text-gray-500">{primaryMember?.name}, </span>
-                        <span>{dependentMembers.join(', ')}</span>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => onDeleteExpenseGroup(group)}
-                      className="text-gray-400 hover:text-red-500 transition-colors"
-                      title="Delete expense group"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-          <p className="text-gray-500 text-sm mt-2">
-            Perfect for couples, families, or roommates - designate one person as the primary payer.
-          </p>
-          </div>
+        {isExpenseGroupsExpanded && (
+          <>
+            {expenseGroups.length === 0 ? (
+              <div className="">
+                <p className="text-gray-400 text-center pt-2 pb-4 text-md font-semibold">No expense groups</p>
+                <p className="text-gray-500 text-sm">
+                  Perfect for couples, families, or roommates - designate one person as the primary payer.
+                </p>
+              </div>
+            ) : (
+              <div>
+                <ul className="divide-y divide-gray-200">
+                  {expenseGroups.map((group) => {
+                    const primaryMember = members.find(m => m.id === group.primary_member_id);
+                    const dependentMembers = group.members
+                      .filter(id => id !== group.primary_member_id)
+                      .map(id => members.find(m => m.id === id)?.name || 'Unknown');
+                    return (
+                      <li key={group.primary_member_id} className="py-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <div className="font-bold text-gray-800 text-base">{group.name}:</div>
+                            <div className="text-sm text-gray-700">
+                              <span className="font-bold text-gray-500">{primaryMember?.name}, </span>
+                              <span>{dependentMembers.join(', ')}</span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => onDeleteExpenseGroup(group)}
+                            className="text-gray-400 hover:text-red-500 transition-colors"
+                            title="Delete expense group"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <p className="text-gray-500 text-sm mt-2">
+                  Perfect for couples, families, or roommates - designate one person as the primary payer.
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
 
