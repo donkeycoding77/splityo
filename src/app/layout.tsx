@@ -36,6 +36,9 @@ export const metadata: Metadata = {
     shortcut: '/favicon.png',
     apple: '/favicon.png',
   },
+  other: {
+    'google-adsense-account': 'ca-pub-9976094635006441',
+  },
 };
 
 export default function RootLayout({
@@ -46,10 +49,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${jost.variable} ${bebasNeue.variable}`}>
       <head>
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png" />
-        <link rel="shortcut icon" href="/favicon.png" />
-        <link rel="apple-touch-icon" href="/favicon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href='/favicon.png' />
+        <link rel="icon" type="image/png" sizes="16x16" href='/favicon.png' />
+        <link rel="shortcut icon" href='/favicon.png' />
+        <link rel="apple-touch-icon" href='/favicon.png' />
+        
+        {/* Google AdSense Verification */}
+        <meta name="google-adsense-account" content="ca-pub-9976094635006441" />
       </head>
       <body
         className={`antialiased`}
