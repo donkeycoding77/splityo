@@ -94,7 +94,7 @@ export default function Home() {
           <div className="rounded-3xl bg-white p-8 shadow-xl ring-2 ring-green-200 hover:ring-pink-200 transition-all flex flex-col items-center text-center max-w-sm w-full">
             <div className="text-2xl bebas-neue-regular">🧮&nbsp;&nbsp;&nbsp;Smart Calculations</div>
             <p className="mt-2 text-gray-600 font-medium">
-              Let us handle the complex math! 🤖 We&apos;ll split everything fairly and show who owes what.
+              Let us handle the math! 🤖 We&apos;ll split everything fairly and show who owes what.
             </p>
           </div>
 

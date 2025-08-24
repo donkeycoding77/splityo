@@ -28,6 +28,14 @@ const bebasNeue = Bebas_Neue({
 export const metadata: Metadata = {
   title: "splityo.cash - Split Expenses with Friends",
   description: "The easiest way to split expenses with friends, roommates, and groups. No more complicated math or awkward conversations about money.",
+  icons: {
+    icon: [
+      { url: '/favicon.png', type: 'image/png', sizes: '32x32' },
+      { url: '/favicon.png', type: 'image/png', sizes: '16x16' }
+    ],
+    shortcut: '/favicon.png',
+    apple: '/favicon.png',
+  },
 };
 
 export default function RootLayout({
@@ -37,7 +45,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${jost.variable} ${bebasNeue.variable}`}>
-      <head />
+      <head>
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png" />
+        <link rel="shortcut icon" href="/favicon.png" />
+        <link rel="apple-touch-icon" href="/favicon.png" />
+      </head>
       <body
         className={`antialiased`}
       >
