@@ -9,6 +9,9 @@ import SettlementList from '@/components/group/SettlementList';
 import DetailsModal from '@/components/group/DetailsModal';
 import EditExpenseModal from '@/components/group/EditExpenseModal';
 import AddExpenseGroupModal from '@/components/group/AddExpenseGroupModal';
+import AddListModal from '@/components/group/AddListModal';
+import EditListModal from '@/components/group/EditListModal';
+import ListCard, { List } from '@/components/group/ListCard';
 import Footer from '@/components/Footer';
 import Logo from '@/components/common/Logo';
 
@@ -29,6 +32,7 @@ interface Group {
     primary_member_id: string;
     members: string[];
   }[];
+  lists: List[];
   created_at: string;
 }
 
@@ -45,6 +49,7 @@ interface Expense {
   date: string;
   created_at: string;
 }
+
 
 export default function GroupPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = usePromise(params);
@@ -86,6 +91,19 @@ export default function GroupPage({ params }: { params: Promise<{ id: string }> 
   const [expenseGroupError, setExpenseGroupError] = useState<string | null>(null);
   const [primaryMemberId, setPrimaryMemberId] = useState('');
 
+  // Tab state
+  const [activeTab, setActiveTab] = useState<'expenses' | 'lists'>('expenses');
+
+  // List state
+  const [lists, setLists] = useState<List[]>([]);
+  const [showAddListModal, setShowAddListModal] = useState(false);
+  const [showEditListModal, setShowEditListModal] = useState(false);
+  const [listTitle, setListTitle] = useState('');
+  const [listSubtitles, setListSubtitles] = useState('');
+  const [listLoading, setListLoading] = useState(false);
+  const [listError, setListError] = useState<string | null>(null);
+  const [editingList, setEditingList] = useState<List | null>(null);
+
   // Fetch group and expenses
   useEffect(() => {
     async function fetchGroupAndExpenses() {
@@ -101,7 +119,14 @@ export default function GroupPage({ params }: { params: Promise<{ id: string }> 
         groupData.members = Array.isArray(groupData.members)
           ? groupData.members
           : JSON.parse(groupData.members);
+        
+        // Ensure lists is parsed as an array of objects
+        groupData.lists = Array.isArray(groupData.lists)
+          ? groupData.lists
+          : (groupData.lists ? JSON.parse(groupData.lists) : []);
+        
         setGroup(groupData);
+        setLists(groupData.lists || []);
         setPayer(groupData.members[0]?.id || '');
         setSplitBetween(groupData.members.map((m: Member) => m.id));
         // Store in localStorage as recently visited group
@@ -273,6 +298,156 @@ export default function GroupPage({ params }: { params: Promise<{ id: string }> 
     });
   }
 
+  // Add list handler
+  async function handleAddList(e: React.FormEvent) {
+    e.preventDefault();
+    setListLoading(true);
+    setListError(null);
+    
+    if (!listTitle.trim() || !listSubtitles.trim()) {
+      setListError('Please provide both title and subtitles.');
+      setListLoading(false);
+      return;
+    }
+
+    try {
+      const sections = listSubtitles.split(',').map(subtitle => ({
+        subtitle: subtitle.trim(),
+        items: []
+      }));
+
+      const newList: List = {
+        id: Date.now().toString(),
+        title: listTitle.trim(),
+        sections,
+        created_at: new Date().toISOString()
+      };
+
+      const updatedLists = [newList, ...lists];
+      setLists(updatedLists);
+
+      // Save to Supabase
+      const { error } = await supabase
+        .from('groups')
+        .update({ lists: updatedLists })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setListTitle('');
+      setListSubtitles('');
+      setShowAddListModal(false);
+    } catch (err) {
+      setListError('Failed to add list.');
+      console.error('Error adding list:', err);
+    } finally {
+      setListLoading(false);
+    }
+  }
+
+  // Update list handler (for list items)
+  async function handleUpdateListItems(updatedList: List) {
+    const updatedLists = lists.map(list => list.id === updatedList.id ? updatedList : list);
+    setLists(updatedLists);
+
+    try {
+      const { error } = await supabase
+        .from('groups')
+        .update({ lists: updatedLists })
+        .eq('id', id);
+
+      if (error) throw error;
+    } catch (err) {
+      console.error('Error updating list:', err);
+      // Revert local state on error
+      setLists(lists);
+    }
+  }
+
+  // Edit list handler
+  function handleEditList(list: List) {
+    setEditingList(list);
+    setListTitle(list.title);
+    setListSubtitles(list.sections.map(s => s.subtitle).join(', '));
+    setListError(null);
+    setShowEditListModal(true);
+  }
+
+  // Update list handler (for edit modal)
+  async function handleUpdateList(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingList) return;
+
+    setListLoading(true);
+    setListError(null);
+    
+    if (!listTitle.trim() || !listSubtitles.trim()) {
+      setListError('Please provide both title and subtitles.');
+      setListLoading(false);
+      return;
+    }
+
+    try {
+      const sections = listSubtitles.split(',').map(subtitle => ({
+        subtitle: subtitle.trim(),
+        items: editingList.sections.find(s => s.subtitle === subtitle.trim())?.items || []
+      }));
+
+      const updatedList: List = {
+        ...editingList,
+        title: listTitle.trim(),
+        sections,
+      };
+
+      const updatedLists = lists.map(list => list.id === editingList.id ? updatedList : list);
+      setLists(updatedLists);
+
+      // Save to Supabase
+      const { error } = await supabase
+        .from('groups')
+        .update({ lists: updatedLists })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setShowEditListModal(false);
+      setEditingList(null);
+    } catch (err) {
+      setListError('Failed to update list.');
+      console.error('Error updating list:', err);
+    } finally {
+      setListLoading(false);
+    }
+  }
+
+  // Delete list handler
+  async function handleDeleteList() {
+    if (!editingList) return;
+
+    setListLoading(true);
+    setListError(null);
+
+    try {
+      const updatedLists = lists.filter(list => list.id !== editingList.id);
+      setLists(updatedLists);
+
+      const { error } = await supabase
+        .from('groups')
+        .update({ lists: updatedLists })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setShowEditListModal(false);
+      setEditingList(null);
+    } catch (err) {
+      setListError('Failed to delete list.');
+      console.error('Error deleting list:', err);
+    } finally {
+      setListLoading(false);
+    }
+  }
+
   // Add expense group handler
   async function handleAddExpenseGroup(e: React.FormEvent) {
     e.preventDefault();
@@ -354,6 +529,8 @@ export default function GroupPage({ params }: { params: Promise<{ id: string }> 
           members={group.members} 
           description={group.description}
           urls={group.url}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
         />
 
         <AddExpenseModal
@@ -378,56 +555,93 @@ export default function GroupPage({ params }: { params: Promise<{ id: string }> 
           error={expenseError}
         />
 
-        <ExpensesList
-          expenses={expenses}
-          currency={group.currency}
-          showAllExpenses={showAllExpenses}
-          onToggleShowAll={() => setShowAllExpenses(v => !v)}
-          onEditExpense={(expense) => {
-            setSelectedExpense(expense);
-            setEditPayer(expense.paid_by_member_id);
-            setEditDescription(expense.description);
-            setEditAmount(expense.amount.toString());
-            setEditDate(expense.date);
-            setEditSplitBetween(expense.split_between.map(s => s.member_id));
-            setEditError(null);
-            setShowEditExpenseModal(true);
-          }}
-          onAddExpense={() => {
-            setDate(new Date().toISOString().split('T')[0]);
-            setShowExpenseModal(true);
-          }}
-          members={group.members}
-        />
+        {activeTab === 'expenses' && (
+          <>
+            <ExpensesList
+              expenses={expenses}
+              currency={group.currency}
+              showAllExpenses={showAllExpenses}
+              onToggleShowAll={() => setShowAllExpenses(v => !v)}
+              onEditExpense={(expense) => {
+                setSelectedExpense(expense);
+                setEditPayer(expense.paid_by_member_id);
+                setEditDescription(expense.description);
+                setEditAmount(expense.amount.toString());
+                setEditDate(expense.date);
+                setEditSplitBetween(expense.split_between.map(s => s.member_id));
+                setEditError(null);
+                setShowEditExpenseModal(true);
+              }}
+              onAddExpense={() => {
+                setDate(new Date().toISOString().split('T')[0]);
+                setShowExpenseModal(true);
+              }}
+              members={group.members}
+            />
 
-        <SettlementList
-          expenses={expenses}
-          settlements={settlements}
-          currency={group.currency}
-          onShowDetails={() => setShowDetailsModal(true)}
-          members={group.members}
-          expenseGroups={group.expense_groups || []}
-          onAddExpenseGroup={() => setShowExpenseGroupModal(true)}
-          onDeleteExpenseGroup={async (groupToDelete) => {
-            try {
-              const updatedExpenseGroups = group.expense_groups.filter(g => 
-                g.primary_member_id !== groupToDelete.primary_member_id
-              );
-              
-              const { error } = await supabase
-                .from('groups')
-                .update({ expense_groups: updatedExpenseGroups })
-                .eq('id', id);
+            <SettlementList
+              expenses={expenses}
+              settlements={settlements}
+              currency={group.currency}
+              onShowDetails={() => setShowDetailsModal(true)}
+              members={group.members}
+              expenseGroups={group.expense_groups || []}
+              onAddExpenseGroup={() => setShowExpenseGroupModal(true)}
+              onDeleteExpenseGroup={async (groupToDelete) => {
+                try {
+                  const updatedExpenseGroups = group.expense_groups.filter(g => 
+                    g.primary_member_id !== groupToDelete.primary_member_id
+                  );
+                  
+                  const { error } = await supabase
+                    .from('groups')
+                    .update({ expense_groups: updatedExpenseGroups })
+                    .eq('id', id);
 
-              if (error) throw error;
+                  if (error) throw error;
 
-              setGroup(prev => prev ? { ...prev, expense_groups: updatedExpenseGroups } : null);
-            } catch (err) {
-              console.error('Error deleting expense group:', err);
-            }
-          }}
-          groupName={group.name}
-        />
+                  setGroup(prev => prev ? { ...prev, expense_groups: updatedExpenseGroups } : null);
+                } catch (err) {
+                  console.error('Error deleting expense group:', err);
+                }
+              }}
+              groupName={group.name}
+            />
+          </>
+        )}
+
+        {activeTab === 'lists' && (
+          <div className="w-full max-w-md space-y-4">
+            {lists.length === 0 ? (
+              <div className="card shadow-2xl">
+                <div className="p-6 text-center">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">No Lists Yet</h3>
+                  <p className="text-gray-500">Create your first list to get started!</p>
+                </div>
+              </div>
+            ) : (
+              lists.map((list) => (
+                <ListCard
+                  key={list.id}
+                  list={list}
+                  onUpdateList={handleUpdateListItems}
+                  onEditList={handleEditList}
+                />
+              ))
+            )}
+            
+            {/* Add List Button */}
+            <button
+              onClick={() => setShowAddListModal(true)}
+              className="bg-blue-500 text-white py-2 px-4 rounded-full font-medium hover:bg-blue-600 transition-colors flex items-center gap-2 shadow-lg mx-auto mt-10"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Add List
+            </button>
+          </div>
+        )}
 
         <DetailsModal
           show={showDetailsModal}
@@ -546,6 +760,35 @@ export default function GroupPage({ params }: { params: Promise<{ id: string }> 
           isLoading={expenseGroupLoading}
           error={expenseGroupError}
           existingExpenseGroups={group.expense_groups || []}
+        />
+
+        <AddListModal
+          show={showAddListModal}
+          onClose={() => setShowAddListModal(false)}
+          onSubmit={handleAddList}
+          title={listTitle}
+          setTitle={setListTitle}
+          subtitles={listSubtitles}
+          setSubtitles={setListSubtitles}
+          isLoading={listLoading}
+          error={listError}
+        />
+
+        <EditListModal
+          show={showEditListModal}
+          onClose={() => {
+            setShowEditListModal(false);
+            setEditingList(null);
+          }}
+          onSubmit={handleUpdateList}
+          onDelete={handleDeleteList}
+          list={editingList}
+          title={listTitle}
+          setTitle={setListTitle}
+          subtitles={listSubtitles}
+          setSubtitles={setListSubtitles}
+          isLoading={listLoading}
+          error={listError}
         />
       </main>
       <Footer />
